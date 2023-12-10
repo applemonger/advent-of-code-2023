@@ -108,6 +108,55 @@ impl History {
 
         *extrapolation_vec.last().unwrap()
     }
+
+    pub fn alternative_extrapolate_score(&self) -> i64 {
+        let mut data = self.data.clone();
+        let mut degree: u32 = 0;
+
+        // Calculate degree of generating polynomial
+        'report: loop {
+            // Increment degree
+            degree += 1;
+
+            // Copy all elements except the last
+            let mut subtract_vec = data.clone();
+            subtract_vec.pop();
+
+            // Insert 0 to shift the elements forward
+            subtract_vec.insert(0, 0);
+
+            // Subtract those elements from the original vector (x_n - x_n-1)
+            data = data.iter().zip(subtract_vec.iter())
+                .map(|(x, y)| {
+                    x - y
+                })
+                .collect();
+
+            // Remove the first element
+            data.remove(0);
+
+            // If the vector is all zeroes
+            if data.iter().all(|n| *n == 0) {
+                degree -= 1;
+                break 'report;
+            }
+        }
+
+        // Create system of equations
+        let mut matrix: Vec<Vec<i64>> = Vec::new();
+        for x in 0..self.data.len() {
+            let mut row = Vec::<i64>::new();
+            for p in 0..=degree {
+                row.push((x as i64).pow(p));
+            }
+            matrix.push(row);
+        }
+
+        // Solve system of equations
+        // (not implemented)
+
+        0
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]

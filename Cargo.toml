@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 regex = "1.10.2"
 aocd = "0.4.0"
+ndarray-linalg = "0.16.0"
