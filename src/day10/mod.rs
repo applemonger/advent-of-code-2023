@@ -268,8 +268,6 @@ pub fn solution2() {
     }
 
     // Flag tiles for port & starboard
-    let mut port_count = 0;
-    let mut starboard_count = 0;
     for pos in port {
         if !grid.tile(pos).connects_to_start {
             grid.flag_port(pos);
