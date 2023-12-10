@@ -271,13 +271,11 @@ pub fn solution2() {
     for pos in port {
         if !grid.tile(pos).connects_to_start {
             grid.flag_port(pos);
-            port_count += 1;
         }
     }
     for pos in starboard {
         if !grid.tile(pos).connects_to_start {
             grid.flag_starboard(pos);
-            starboard_count += 1;
         }
     }
 
