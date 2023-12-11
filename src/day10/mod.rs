@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, fs};
 
 use aocd::*;
 
@@ -44,6 +44,20 @@ impl Tile {
             _ => unreachable!("Invalid from_gate.")
         };
         from_gate_open && to_gate_open
+    }
+
+    pub fn display_tile(&self) -> char {
+        match self.value {
+            'F' => '┌',
+            'J' => '┘',
+            'L' => '└',
+            '7' => '┐',
+            'S' => 'S',
+            '.' => '.',
+            '|' => '│',
+            '-' => '─',
+            _ => unreachable!("Unfound character.")
+        }
     }
 }
 
@@ -172,7 +186,22 @@ pub fn solution1() {
 
 #[aocd(2023, 10)]
 pub fn solution2() {
-// Read in grid map
+    // let contents = fs::read_to_string("src/day10/test4.txt").expect("Unable to read file.");
+    // let mut grid: Vec<Vec<Tile>> = contents.split('\n')
+    //     .map(|s| {
+    //         let mut row = Vec::<Tile>::new();
+    //         row.push(Tile::from_char('.')); // margin
+    //         for c in s.chars() {
+    //             if "F7JL|-S.".contains(c) {
+    //                 row.push(Tile::from_char(c))
+    //             }
+    //         }
+    //         row.push(Tile::from_char('.')); // margin
+    //         row
+    //     })
+    //     .collect();
+
+    // Read in grid map
     // Add in margin of . tiles around grid so we don't have to care about out-of-bounds indexing
     let mut grid: Vec<Vec<Tile>> = input!()
         .split('\n')
@@ -237,27 +266,23 @@ pub fn solution2() {
             // If it connects and hasn't been added, flag it as added and move our current position
             if connects && !added_to_loop {
                 // Mark the port & starboard of new position
-                let (new_port, new_starboard) = if *pos == (i-1, j) {
+                let (new_port_1, new_port_2, new_starboard_1, new_starboard_2) = if *pos == (i-1, j) {
                     // Moving up
-                    ((i-1, j-1), (i-1, j+1))
+                    ((i-1, j-1), (i, j-1), (i-1, j+1), (i, j+1))
                 } else if *pos == (i+1, j) {
                     // Moving down
-                    ((i+1, j+1), (i+1, j-1))
+                    ((i+1, j+1), (i, j+1), (i+1, j-1), (i, j-1))
                 } else if *pos == (i, j-1) {
                     // Moving left
-                    ((i+1, j-1), (i-1, j-1))
+                    ((i+1, j-1), (i+1, j), (i-1, j-1), (i-1, j))
                 } else {
                     // Moving right
-                    ((i-1, j+1), (i+1, j+1))
+                    ((i-1, j+1), (i-1, j), (i+1, j+1), (i+1, j))
                 };
-                let is_margin = (new_port.0 == 0) || (new_port.0 == nrows) || (new_port.1 == 0) || (new_port.1 == 1);
-                if !is_margin {
-                    port.insert(new_port);
-                }
-                let is_margin = (new_starboard.0 == 0) || (new_starboard.0 == nrows) || (new_starboard.1 == 0) || (new_starboard.1 == 1);
-                if !is_margin {
-                    starboard.insert(new_starboard);
-                }
+                port.insert(new_port_1);
+                port.insert(new_port_2);
+                starboard.insert(new_starboard_1);
+                starboard.insert(new_starboard_2);
                 position = *pos;
                 grid.connect_to_loop(*pos);
                 main_loop_count += 1;
@@ -324,7 +349,7 @@ pub fn solution2() {
                     starboard_count += 1;
                     '#'
                 } else {
-                    s.value
+                    s.display_tile()
                 }
             })
             .collect();
@@ -335,4 +360,5 @@ pub fn solution2() {
     // Submit solution
     println!("Main loop count: {}", main_loop_count / 2);
     println!("{} {}", port_count, starboard_count);
+    submit!(2, port_count);
 }
