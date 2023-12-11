@@ -311,13 +311,11 @@ pub fn solution2() {
                 if !grid.tile((i, j)).connects_to_start {
                     let positions = [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)];
                     for pos in positions {
-                        if grid.tile(pos).port_flag == true && !grid.tile((i, j)).port_flag {
+                        if grid.tile(pos).port_flag && !grid.tile((i, j)).port_flag {
                             grid.flag_port((i, j));
                             added_flag = true;
                         }
-                        if grid.tile(pos).starboard_flag == true
-                            && !grid.tile((i, j)).starboard_flag
-                        {
+                        if grid.tile(pos).starboard_flag && !grid.tile((i, j)).starboard_flag {
                             grid.flag_starboard((i, j));
                             added_flag = true;
                         }

@@ -48,7 +48,7 @@ impl History {
                 extrapolation_vec.push(0);
             } else if i == 1 {
                 // Extrapolate second-to-last vector (constants)
-                let num = vec.first().unwrap().clone();
+                let num = *vec.first().unwrap();
                 extrapolation_vec.push(num);
             } else {
                 // Extrapolate for any higher vecs
@@ -101,7 +101,7 @@ impl History {
                 extrapolation_vec.push(0);
             } else if i == 1 {
                 // Extrapolate second-to-last vector (constants)
-                let num = vec.first().unwrap().clone();
+                let num = *vec.first().unwrap();
                 extrapolation_vec.push(num);
             } else {
                 // Extrapolate for any higher vecs

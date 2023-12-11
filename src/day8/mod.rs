@@ -39,17 +39,17 @@ pub fn solution1() {
     let mut steps: u64 = 0;
     let mut current_node: String = String::from("AAA");
     'outer: loop {
-        for command in commands.chars().into_iter() {
+        for command in commands.chars() {
             if current_node == "ZZZ" {
                 println!("found!");
                 break 'outer;
             }
             if command == 'L' {
                 steps += 1;
-                current_node = (*nodes.get(&current_node).unwrap()).0.clone();
+                current_node = nodes.get(&current_node).unwrap().0.clone();
             } else if command == 'R' {
                 steps += 1;
-                current_node = (*nodes.get(&current_node).unwrap()).1.clone();
+                current_node = nodes.get(&current_node).unwrap().1.clone();
             }
         }
     }
@@ -96,11 +96,8 @@ pub fn solution2() {
         );
 
     // Get A nodes
-    let mut current_nodes: Vec<String> = nodes
-        .keys()
-        .filter(|s| s.ends_with('A'))
-        .map(|s| s.clone())
-        .collect();
+    let mut current_nodes: Vec<String> =
+        nodes.keys().filter(|s| s.ends_with('A')).cloned().collect();
 
     // List of first occurrence of a Z node and cycle duration until next one
     let mut z_data: Vec<u64> = Vec::new();

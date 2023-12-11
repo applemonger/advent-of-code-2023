@@ -22,12 +22,10 @@ impl FromStr for HandType {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         // Convert string to count of cards
         let mut hand_map: HashMap<char, usize> =
-            s.chars()
-                .into_iter()
-                .fold(HashMap::<char, usize>::new(), |mut m, x| {
-                    *m.entry(x).or_default() += 1;
-                    m
-                });
+            s.chars().fold(HashMap::<char, usize>::new(), |mut m, x| {
+                *m.entry(x).or_default() += 1;
+                m
+            });
 
         // Get 'J' counts
         let joker_count = if let Some(n) = hand_map.remove(&'J') {
@@ -42,12 +40,11 @@ impl FromStr for HandType {
         }
 
         // Find card type with most counts
-        let max_card = hand_map
+        let max_card = *hand_map
             .iter()
-            .max_by(|a, b| a.1.cmp(&b.1))
+            .max_by(|a, b| a.1.cmp(b.1))
             .map(|(k, _v)| k)
-            .unwrap()
-            .clone();
+            .unwrap();
 
         // Add jokers to card type with most counts
         *hand_map.get_mut(&max_card).unwrap() += joker_count;
@@ -105,7 +102,6 @@ impl Play {
         let encoded_cards: Vec<u8> = self
             .hand
             .chars()
-            .into_iter()
             .map(|c| match &c {
                 'J' => 1,
                 '2' => 2,

@@ -155,7 +155,7 @@ pub fn solution2() {
 
         let row_dist = (row_max as u64 - row_min as u64) + (empty_row_count * 999_999);
         let col_dist = (col_max as u64 - col_min as u64) + (empty_col_count * 999_999);
-        dists.push((row_dist + col_dist) as u64);
+        dists.push(row_dist + col_dist);
     }
 
     // Get sum of distances
