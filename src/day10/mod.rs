@@ -8,7 +8,7 @@ pub struct Tile {
     gates: u8, // up, left, right, down
     connects_to_start: bool,
     port_flag: bool,
-    starboard_flag: bool
+    starboard_flag: bool,
 }
 
 impl Tile {
@@ -22,7 +22,7 @@ impl Tile {
             '-' => 0b0110,
             '|' => 0b1001,
             'S' => 0b1111,
-            _ => unreachable!("Character not present in input data.")
+            _ => unreachable!("Character not present in input data."),
         };
         let connects_to_start = c == 'S';
         Tile {
@@ -30,7 +30,7 @@ impl Tile {
             gates,
             connects_to_start,
             port_flag: false,
-            starboard_flag: false
+            starboard_flag: false,
         }
     }
 
@@ -41,7 +41,7 @@ impl Tile {
             0b0100 => (tile.gates & 0b0010) == 0b0010,
             0b0010 => (tile.gates & 0b0100) == 0b0100,
             0b0001 => (tile.gates & 0b1000) == 0b1000,
-            _ => unreachable!("Invalid from_gate.")
+            _ => unreachable!("Invalid from_gate."),
         };
         from_gate_open && to_gate_open
     }
@@ -56,13 +56,13 @@ impl Tile {
             '.' => '.',
             '|' => '│',
             '-' => '─',
-            _ => unreachable!("Unfound character.")
+            _ => unreachable!("Unfound character."),
         }
     }
 }
 
 pub struct Grid {
-    grid: Vec<Vec<Tile>>
+    grid: Vec<Vec<Tile>>,
 }
 
 impl Grid {
@@ -88,9 +88,7 @@ impl Grid {
 
     pub fn print(&self) {
         for row in &self.grid {
-            let row_string: String = row.iter()
-                .map(|s| s.value)
-                .collect();
+            let row_string: String = row.iter().map(|s| s.value).collect();
 
             println!("{}", row_string);
         }
@@ -126,7 +124,7 @@ pub fn solution1() {
     // Determine grid size
     let nrows = grid.len() - 1;
     let ncols = grid[0].len() - 1;
-    
+
     // Find starting position
     let mut position = (0, 0);
     for i in 1..nrows {
@@ -148,7 +146,7 @@ pub fn solution1() {
         let i = position.0;
         let j = position.1;
         // Position of adjacent tiles
-        let positions = [(i-1, j), (i+1, j), (i, j-1), (i, j+1)];
+        let positions = [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)];
         // Gates that those respective adjacent tiles can connect to
         let from_gates: [u8; 4] = [0b1000, 0b0001, 0b0100, 0b0010];
         // Iterate through adjacent tiles
@@ -228,7 +226,7 @@ pub fn solution2() {
     // Determine grid size
     let nrows = grid.len() - 1;
     let ncols = grid[0].len() - 1;
-    
+
     // Find starting position
     let mut position = (0, 0);
     for i in 1..nrows {
@@ -254,7 +252,7 @@ pub fn solution2() {
         let i = position.0;
         let j = position.1;
         // Position of adjacent tiles
-        let positions = [(i-1, j), (i+1, j), (i, j-1), (i, j+1)];
+        let positions = [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)];
         // Gates that those respective adjacent tiles can connect to
         let from_gates: [u8; 4] = [0b1000, 0b0001, 0b0100, 0b0010];
         // Iterate through adjacent tiles
@@ -266,19 +264,20 @@ pub fn solution2() {
             // If it connects and hasn't been added, flag it as added and move our current position
             if connects && !added_to_loop {
                 // Mark the port & starboard of new position
-                let (new_port_1, new_port_2, new_starboard_1, new_starboard_2) = if *pos == (i-1, j) {
-                    // Moving up
-                    ((i-1, j-1), (i, j-1), (i-1, j+1), (i, j+1))
-                } else if *pos == (i+1, j) {
-                    // Moving down
-                    ((i+1, j+1), (i, j+1), (i+1, j-1), (i, j-1))
-                } else if *pos == (i, j-1) {
-                    // Moving left
-                    ((i+1, j-1), (i+1, j), (i-1, j-1), (i-1, j))
-                } else {
-                    // Moving right
-                    ((i-1, j+1), (i-1, j), (i+1, j+1), (i+1, j))
-                };
+                let (new_port_1, new_port_2, new_starboard_1, new_starboard_2) =
+                    if *pos == (i - 1, j) {
+                        // Moving up
+                        ((i - 1, j - 1), (i, j - 1), (i - 1, j + 1), (i, j + 1))
+                    } else if *pos == (i + 1, j) {
+                        // Moving down
+                        ((i + 1, j + 1), (i, j + 1), (i + 1, j - 1), (i, j - 1))
+                    } else if *pos == (i, j - 1) {
+                        // Moving left
+                        ((i + 1, j - 1), (i + 1, j), (i - 1, j - 1), (i - 1, j))
+                    } else {
+                        // Moving right
+                        ((i - 1, j + 1), (i - 1, j), (i + 1, j + 1), (i + 1, j))
+                    };
                 port.insert(new_port_1);
                 port.insert(new_port_2);
                 starboard.insert(new_starboard_1);
@@ -310,13 +309,15 @@ pub fn solution2() {
         for i in 1..nrows {
             for j in 1..ncols {
                 if !grid.tile((i, j)).connects_to_start {
-                    let positions = [(i-1, j), (i+1, j), (i, j-1), (i, j+1)];
+                    let positions = [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)];
                     for pos in positions {
                         if grid.tile(pos).port_flag == true && !grid.tile((i, j)).port_flag {
                             grid.flag_port((i, j));
                             added_flag = true;
                         }
-                        if grid.tile(pos).starboard_flag == true && !grid.tile((i, j)).starboard_flag {
+                        if grid.tile(pos).starboard_flag == true
+                            && !grid.tile((i, j)).starboard_flag
+                        {
                             grid.flag_starboard((i, j));
                             added_flag = true;
                         }

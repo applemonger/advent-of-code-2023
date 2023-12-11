@@ -1,7 +1,6 @@
 use aocd::*;
 use regex::Regex;
-use std::{str::FromStr, collections::HashMap};
-
+use std::{collections::HashMap, str::FromStr};
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
 pub enum HandType {
@@ -11,7 +10,7 @@ pub enum HandType {
     ThreeOfAKind,
     FullHouse,
     FourOfAKind,
-    FiveOfAKind
+    FiveOfAKind,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -22,12 +21,13 @@ impl FromStr for HandType {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         // Convert string to count of cards
-        let mut hand_map: HashMap<char, usize> = s.chars()
-            .into_iter()
-            .fold(HashMap::<char, usize>::new(), |mut m, x| {
-                *m.entry(x).or_default() += 1;
-                m
-            });
+        let mut hand_map: HashMap<char, usize> =
+            s.chars()
+                .into_iter()
+                .fold(HashMap::<char, usize>::new(), |mut m, x| {
+                    *m.entry(x).or_default() += 1;
+                    m
+                });
 
         // Get 'J' counts
         let joker_count = if let Some(n) = hand_map.remove(&'J') {
@@ -66,7 +66,7 @@ impl FromStr for HandType {
             (3, 2) => Ok(Self::TwoPair),
             (4, 2) => Ok(Self::OnePair),
             (5, 1) => Ok(Self::HighCard),
-            _ => unreachable!("Impossible hand")
+            _ => unreachable!("Impossible hand"),
         }
     }
 }
@@ -88,36 +88,39 @@ impl FromStr for Play {
         let hand_regex = Regex::new(r"^(.{5}) ").unwrap();
         let hand = hand_regex.captures(s).unwrap()[1].to_string();
         let bid_regex = Regex::new(r" (\d*)$").unwrap();
-        let bid: u32 = bid_regex.captures(s).unwrap()[1].to_string().parse().unwrap();
+        let bid: u32 = bid_regex.captures(s).unwrap()[1]
+            .to_string()
+            .parse()
+            .unwrap();
         Ok(Play {
             hand_type: HandType::from_str(hand.as_str()).unwrap(),
             hand,
-            bid
+            bid,
         })
     }
 }
 
 impl Play {
     pub fn encode_hand(&self) -> (HandType, u8, u8, u8, u8, u8) {
-        let encoded_cards: Vec<u8> = self.hand.chars()
+        let encoded_cards: Vec<u8> = self
+            .hand
+            .chars()
             .into_iter()
-            .map(|c| {
-                match &c {
-                    'J' => 1,
-                    '2' => 2,
-                    '3' => 3,
-                    '4' => 4,
-                    '5' => 5,
-                    '6' => 6,
-                    '7' => 7,
-                    '8' => 8,
-                    '9' => 9,
-                    'T' => 10,
-                    'Q' => 12,
-                    'K' => 13,
-                    'A' => 14,
-                    _ => unreachable!("Unreachable card rank.")
-                }
+            .map(|c| match &c {
+                'J' => 1,
+                '2' => 2,
+                '3' => 3,
+                '4' => 4,
+                '5' => 5,
+                '6' => 6,
+                '7' => 7,
+                '8' => 8,
+                '9' => 9,
+                'T' => 10,
+                'Q' => 12,
+                'K' => 13,
+                'A' => 14,
+                _ => unreachable!("Unreachable card rank."),
             })
             .collect();
 
@@ -128,10 +131,9 @@ impl Play {
             encoded_cards[2],
             encoded_cards[3],
             encoded_cards[4],
-        ) 
+        )
     }
 }
-
 
 #[aocd(2023, 7)]
 pub fn solution2() {
@@ -145,11 +147,10 @@ pub fn solution2() {
     hands.sort_by_key(|hand| hand.encode_hand());
 
     // Get bid-product
-    let total: u32 = hands.iter()
+    let total: u32 = hands
+        .iter()
         .enumerate()
-        .map(|(i, hand)| {
-            (i as u32 + 1) * hand.bid
-        })
+        .map(|(i, hand)| (i as u32 + 1) * hand.bid)
         .sum();
 
     submit!(2, total);
@@ -258,7 +259,7 @@ impl Play {
             encoded_cards[2],
             encoded_cards[3],
             encoded_cards[4],
-        ) 
+        )
     }
 }
 

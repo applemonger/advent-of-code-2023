@@ -92,7 +92,7 @@ pub fn solution2() {
             empty_rows.push(i);
         }
     }
-    
+
     // Get indices of empty columns
     let mut empty_cols: Vec<usize> = Vec::new();
     for j in 0..grid[0].len() {

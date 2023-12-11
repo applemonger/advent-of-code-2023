@@ -1,13 +1,10 @@
 use aocd::*;
-use std::collections::HashMap;
 use regex::Regex;
+use std::collections::HashMap;
 
 #[aocd(2023, 8)]
 pub fn solution1() {
-    let mut lines: Vec<String> = input!()
-        .split('\n')
-        .map(|s| s.to_string())
-        .collect();
+    let mut lines: Vec<String> = input!().split('\n').map(|s| s.to_string()).collect();
 
     // Get commands
     let commands = lines[0].clone();
@@ -30,11 +27,14 @@ pub fn solution1() {
 
             (id, left, right)
         })
-        .fold(HashMap::<String, (String, String)>::new(), |mut m, (id, left, right)| {
-            m.insert(id, (left, right));
-            m
-        });
-    
+        .fold(
+            HashMap::<String, (String, String)>::new(),
+            |mut m, (id, left, right)| {
+                m.insert(id, (left, right));
+                m
+            },
+        );
+
     // Navigate to ZZZ and count steps
     let mut steps: u64 = 0;
     let mut current_node: String = String::from("AAA");
@@ -59,21 +59,12 @@ pub fn solution1() {
 
 #[aocd(2023, 8)]
 pub fn solution2() {
-    let mut lines: Vec<String> = input!()
-        .split('\n')
-        .map(|s| s.to_string())
-        .collect();
+    let mut lines: Vec<String> = input!().split('\n').map(|s| s.to_string()).collect();
 
     // Get commands
     let commands: Vec<usize> = lines[0]
         .chars()
-        .map(|s| {
-            if s == 'L' {
-                0
-            } else {
-                1
-            }
-        })
+        .map(|s| if s == 'L' { 0 } else { 1 })
         .collect();
 
     println!("Command length: {}", commands.len());
@@ -96,10 +87,13 @@ pub fn solution2() {
 
             (id.to_string(), left.to_string(), right.to_string())
         })
-        .fold(HashMap::<String, [String; 2]>::new(), |mut m, (id, left, right)| {
-            m.insert(id, [left, right]);
-            m
-        });
+        .fold(
+            HashMap::<String, [String; 2]>::new(),
+            |mut m, (id, left, right)| {
+                m.insert(id, [left, right]);
+                m
+            },
+        );
 
     // Get A nodes
     let mut current_nodes: Vec<String> = nodes
@@ -136,7 +130,6 @@ pub fn solution2() {
         } else {
             fct += 1;
         }
-        
     }
 
     submit!(2, fct * largest);

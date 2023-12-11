@@ -3,7 +3,7 @@ use std::str::FromStr;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct History {
-    data: Vec<i64>
+    data: Vec<i64>,
 }
 
 impl History {
@@ -20,10 +20,12 @@ impl History {
             subtract_vec.insert(0, 0);
 
             // Subtract those elements from the original vector (x_n - x_n-1)
-            let mut diff_vec: Vec<i64> = vecs.last().unwrap().iter().zip(subtract_vec.iter())
-                .map(|(x, y)| {
-                    x - y
-                })
+            let mut diff_vec: Vec<i64> = vecs
+                .last()
+                .unwrap()
+                .iter()
+                .zip(subtract_vec.iter())
+                .map(|(x, y)| x - y)
                 .collect();
 
             // Remove the first element
@@ -71,10 +73,12 @@ impl History {
             subtract_vec.insert(0, 0);
 
             // Subtract those elements from the original vector (x_n - x_n-1)
-            let mut diff_vec: Vec<i64> = vecs.last().unwrap().iter().zip(subtract_vec.iter())
-                .map(|(x, y)| {
-                    x - y
-                })
+            let mut diff_vec: Vec<i64> = vecs
+                .last()
+                .unwrap()
+                .iter()
+                .zip(subtract_vec.iter())
+                .map(|(x, y)| x - y)
                 .collect();
 
             // Remove the first element
@@ -126,10 +130,10 @@ impl History {
             subtract_vec.insert(0, 0);
 
             // Subtract those elements from the original vector (x_n - x_n-1)
-            data = data.iter().zip(subtract_vec.iter())
-                .map(|(x, y)| {
-                    x - y
-                })
+            data = data
+                .iter()
+                .zip(subtract_vec.iter())
+                .map(|(x, y)| x - y)
                 .collect();
 
             // Remove the first element
@@ -174,9 +178,7 @@ impl FromStr for History {
             })
             .collect();
 
-        Ok(History {
-            data
-        })
+        Ok(History { data })
     }
 }
 
@@ -219,7 +221,10 @@ pub fn solution2() {
     // let test_history_4 = History::from_str("3 3 3 3 3 3").unwrap();
     // println!("{}", test_history_4.extrapolate_score());
 
-    let score: i64 = histories.iter().map(|h| h.reverse_extrapolate_score()).sum();
+    let score: i64 = histories
+        .iter()
+        .map(|h| h.reverse_extrapolate_score())
+        .sum();
 
     submit!(2, score);
 }
