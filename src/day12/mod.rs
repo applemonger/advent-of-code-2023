@@ -66,13 +66,7 @@ impl Record {
         let re = Regex::new(pattern.as_str()).unwrap();
         candidates
             .iter()
-            .map(|s| {
-                if re.find(s.as_str()).is_some() {
-                    1
-                } else {
-                    0
-                }
-            })
+            .map(|s| if re.find(s.as_str()).is_some() { 1 } else { 0 })
             .sum()
     }
 
