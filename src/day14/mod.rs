@@ -1,4 +1,4 @@
-use std::{fs, collections::{hash_map::DefaultHasher, HashSet}, hash::{Hash, Hasher}};
+use std::{collections::hash_map::DefaultHasher, hash::{Hash, Hasher}};
 use aocd::*;
 
 pub struct Grid {

@@ -1,5 +1,3 @@
-use std::fs;
-
 use aocd::*;
 
 pub struct Map {
