@@ -1,19 +1,17 @@
-use std::{collections::hash_map::DefaultHasher, hash::{Hash, Hasher}};
 use aocd::*;
+use std::{
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+};
 
 pub struct Grid {
-    pub data: Vec<Vec<char>>
+    pub data: Vec<Vec<char>>,
 }
 
 impl Grid {
     pub fn from_vec_string(v: Vec<String>) -> Grid {
-        let data: Vec<Vec<char>> = v
-            .iter()
-            .map(|s| s.chars().collect::<Vec<char>>())
-            .collect();
-        Grid {
-            data
-        }
+        let data: Vec<Vec<char>> = v.iter().map(|s| s.chars().collect::<Vec<char>>()).collect();
+        Grid { data }
     }
 
     pub fn rotate_clockwise(&mut self) {
@@ -36,18 +34,19 @@ impl Grid {
     }
 
     pub fn tilt(&mut self) {
-        let tilted_data: Vec<Vec<char>> = self.data
+        let tilted_data: Vec<Vec<char>> = self
+            .data
             .iter()
             .map(|v| {
                 let s: String = v.iter().collect();
-                let mut lines = s.split('#')
-                    .map(|s| {
+                let mut lines = s
+                    .split('#')
+                    .flat_map(|s| {
                         let mut line_vec = s.chars().collect::<Vec<char>>();
                         line_vec.sort();
                         line_vec.push('#');
                         line_vec
                     })
-                    .flatten()
                     .collect::<Vec<char>>();
                 lines.pop();
                 lines
@@ -103,7 +102,7 @@ pub fn solution2() {
     let lines: Vec<String> = input_data.split('\n').map(|s| s.to_string()).collect();
     let mut grid = Grid::from_vec_string(lines.clone());
 
-    // Store hashes of grid after each cycle to identify 
+    // Store hashes of grid after each cycle to identify
     let mut hashes: Vec<u64> = Vec::new();
     'cycles: loop {
         // Cycle the grid
@@ -127,15 +126,15 @@ pub fn solution2() {
 
     // Get the length of the phase
     let cycle_duration = hashes.len() - initial_cycle;
-    
+
     // Set the number of cycles for which we want to find the score
     let n = 1_000_000_000; // Get the score at the billionth cycle
 
     // Shortened number of cycles we need to run
     let n_cycles = initial_cycle + (n - initial_cycle) % cycle_duration;
-    
+
     // Put it through abbreviated cycles
-    let mut grid = Grid::from_vec_string(lines.clone());
+    let mut grid = Grid::from_vec_string(lines);
     for _ in 1..=n_cycles {
         grid.cycle();
     }

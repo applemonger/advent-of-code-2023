@@ -2,7 +2,7 @@ use aocd::*;
 
 pub struct Map {
     h_data: Vec<Vec<u8>>,
-    v_data: Vec<Vec<u8>>
+    v_data: Vec<Vec<u8>>,
 }
 
 impl Map {
@@ -31,10 +31,7 @@ impl Map {
             v_data.push(col);
         }
 
-        Map {
-            h_data,
-            v_data
-        }
+        Map { h_data, v_data }
     }
 
     pub fn display_horizontal_map(&self) {
@@ -42,7 +39,7 @@ impl Map {
             let s: String = row.iter().map(|n| format!("{n}")).collect();
             println!("{}", s);
         }
-        println!("");
+        println!();
     }
 
     pub fn display_vertical_map(&self) {
@@ -50,7 +47,7 @@ impl Map {
             let s: String = row.iter().map(|n| format!("{n}")).collect();
             println!("{}", s);
         }
-        println!("");
+        println!();
     }
 
     pub fn find_horizontal_symmetry(&self) -> u64 {
@@ -59,31 +56,31 @@ impl Map {
             let mut mirrored = Vec::<bool>::new();
             for j in 0..i {
                 let a = self.h_data[j].clone();
-                if let Some(b) = self.h_data.get(2*i-1-j) {
+                if let Some(b) = self.h_data.get(2 * i - 1 - j) {
                     let row_mirrored = a.iter().zip(b.iter()).all(|(x, y)| x == y);
                     mirrored.push(row_mirrored);
                 }
             }
             if mirrored.iter().all(|b| *b) {
-                return i as u64 * 100
+                return i as u64 * 100;
             }
         }
         0
     }
-    
+
     pub fn find_vertical_symmetry(&self) -> u64 {
         let n = self.v_data.len();
         for i in 1..n {
             let mut mirrored = Vec::<bool>::new();
             for j in 0..i {
                 let a = self.v_data[j].clone();
-                if let Some(b) = self.v_data.get(2*i-1-j) {
+                if let Some(b) = self.v_data.get(2 * i - 1 - j) {
                     let row_mirrored = a.iter().zip(b.iter()).all(|(x, y)| x == y);
                     mirrored.push(row_mirrored);
                 }
             }
             if mirrored.iter().all(|b| *b) {
-                return i as u64
+                return i as u64;
             }
         }
         0
@@ -95,27 +92,21 @@ impl Map {
             let mut mirrored = Vec::<u64>::new();
             for j in 0..i {
                 let a = self.h_data[j].clone();
-                if let Some(b) = self.h_data.get(2*i-1-j) {
+                if let Some(b) = self.h_data.get(2 * i - 1 - j) {
                     let row_mirrored: u64 = a
                         .iter()
                         .zip(b.iter())
-                        .map(|(x, y)| {
-                            if x == y {
-                                0
-                            } else {
-                                1
-                            }
-                        })
+                        .map(|(x, y)| if x == y { 0 } else { 1 })
                         .sum();
                     mirrored.push(row_mirrored);
                 }
             }
             if mirrored.iter().sum::<u64>() == 1 {
-                return i as u64 * 100
+                return i as u64 * 100;
             }
         }
         0
-    } 
+    }
 
     pub fn find_near_vertical_symmetry(&self) -> u64 {
         let n = self.v_data.len();
@@ -123,28 +114,22 @@ impl Map {
             let mut mirrored = Vec::<u64>::new();
             for j in 0..i {
                 let a = self.v_data[j].clone();
-                if let Some(b) = self.v_data.get(2*i-1-j) {
+                if let Some(b) = self.v_data.get(2 * i - 1 - j) {
                     let row_mirrored: u64 = a
                         .iter()
                         .zip(b.iter())
-                        .map(|(x, y)| {
-                            if x == y {
-                                0
-                            } else {
-                                1
-                            }
-                        })
+                        .map(|(x, y)| if x == y { 0 } else { 1 })
                         .sum();
                     mirrored.push(row_mirrored);
                 }
             }
             if mirrored.iter().sum::<u64>() == 1 {
-                return i as u64
+                return i as u64;
             }
         }
         0
     }
-    
+
     pub fn find_symmetry(&self) -> u64 {
         self.find_horizontal_symmetry() + self.find_vertical_symmetry()
     }
@@ -153,7 +138,6 @@ impl Map {
         self.find_near_horizontal_symmetry() + self.find_near_vertical_symmetry()
     }
 }
-
 
 #[aocd(2023, 13)]
 pub fn solution1() {
@@ -171,11 +155,8 @@ pub fn solution1() {
     }
 
     // Find symmetry scores
-    let total: u64 = maps
-        .iter()
-        .map(|s| s.find_symmetry())
-        .sum();
-    
+    let total: u64 = maps.iter().map(|s| s.find_symmetry()).sum();
+
     submit!(1, total);
 }
 
@@ -195,10 +176,7 @@ pub fn solution2() {
     }
 
     // Find symmetry scores
-    let total: u64 = maps
-        .iter()
-        .map(|s| s.find_near_symmetry())
-        .sum();
-    
+    let total: u64 = maps.iter().map(|s| s.find_near_symmetry()).sum();
+
     submit!(2, total);
 }

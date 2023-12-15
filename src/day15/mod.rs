@@ -4,7 +4,7 @@ use std::str::FromStr;
 #[derive(Debug, Clone)]
 pub struct Sequence {
     original: String,
-    values: Vec<u8>
+    values: Vec<u8>,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -17,21 +17,19 @@ impl FromStr for Sequence {
         let values: Vec<u8> = s.chars().map(|c| c as u8).collect();
         Ok(Sequence {
             original: s.to_owned(),
-            values
+            values,
         })
     }
 }
 
 impl Sequence {
     pub fn hash(&self) -> u64 {
-        self.values
-            .iter()
-            .fold(0u64, |mut acc, el| {
-                acc += *el as u64;
-                acc *= 17;
-                acc = acc % 256;
-                acc
-            })
+        self.values.iter().fold(0u64, |mut acc, el| {
+            acc += *el as u64;
+            acc *= 17;
+            acc %= 256;
+            acc
+        })
     }
 }
 
@@ -39,15 +37,10 @@ impl Sequence {
 pub fn solution1() {
     let sequences: Vec<Sequence> = input!()
         .split(',')
-        .map(|s| {
-            Sequence::from_str(s.trim()).unwrap()
-        })
+        .map(|s| Sequence::from_str(s.trim()).unwrap())
         .collect();
 
-    let total: u64 = sequences
-        .iter()
-        .map(|seq| seq.hash())
-        .sum();
+    let total: u64 = sequences.iter().map(|seq| seq.hash()).sum();
 
     submit!(1, total);
 }
@@ -56,7 +49,7 @@ pub fn solution1() {
 pub struct Lens {
     label: Sequence,
     focal_length: u8,
-    operator: char
+    operator: char,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -73,9 +66,9 @@ impl FromStr for Lens {
             let s = s_vec.iter().collect::<String>();
             let label = Sequence::from_str(s.as_str()).unwrap();
             Ok(Lens {
-                label, 
+                label,
                 focal_length,
-                operator
+                operator,
             })
         } else {
             let mut s_vec: Vec<char> = s.chars().collect();
@@ -84,9 +77,9 @@ impl FromStr for Lens {
             let s = s_vec.iter().collect::<String>();
             let label = Sequence::from_str(s.as_str()).unwrap();
             Ok(Lens {
-                label, 
+                label,
                 focal_length,
-                operator
+                operator,
             })
         }
     }
@@ -94,21 +87,23 @@ impl FromStr for Lens {
 
 pub struct LensBox {
     index: u8,
-    lenses: Vec<Lens>
+    lenses: Vec<Lens>,
 }
 
 impl LensBox {
     pub fn new(index: u8) -> LensBox {
         LensBox {
             index,
-            lenses: Vec::<Lens>::new()
+            lenses: Vec::<Lens>::new(),
         }
     }
 
     pub fn score(&self) -> u64 {
-        self.lenses.iter().enumerate().map(|(i, lens)| {
-            (self.index as u64 + 1) * (i as u64 + 1) * lens.focal_length as u64
-        }).sum()
+        self.lenses
+            .iter()
+            .enumerate()
+            .map(|(i, lens)| (self.index as u64 + 1) * (i as u64 + 1) * lens.focal_length as u64)
+            .sum()
     }
 
     pub fn handle_lens(&mut self, lens: Lens) {
@@ -127,7 +122,7 @@ impl LensBox {
             }
         } else if lens.operator == '=' {
             let mut already_exists = false;
-            'search: for (i, l) in self.lenses.iter_mut().enumerate() {
+            'search: for (_, l) in self.lenses.iter_mut().enumerate() {
                 if l.label.original == lens.label.original {
                     already_exists = true;
                     l.focal_length = lens.focal_length;
