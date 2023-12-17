@@ -94,6 +94,11 @@ impl Tile {
             _ => unreachable!("Non-existent tile type.")
         }
     }
+
+    pub fn clear(&mut self) {
+        self.energized = false;
+        self.history = Vec::new();
+    }
 }
 
 #[derive(Hash)]
@@ -127,6 +132,36 @@ impl Grid {
         (position.0 < 0) || (position.0 >= self.grid.len() as i32) || (position.1 < 0) || (position.1 >= self.grid[0].len() as i32)
     }
 
+    pub fn beam_photon_at(&mut self, position: (i32, i32), direction: Direction) {
+        // Create first photon
+        let initial_photon = Photon {
+            position,
+            direction
+        };
+        
+        // List to store all photons
+        let mut photons = vec![initial_photon];
+
+        // Traverse the grid
+        while !photons.is_empty() {
+            // Move each photon
+            photons.retain_mut(|p| p.travel(self));
+
+            // Transform directions based on tile position
+            photons = photons
+                .iter_mut()
+                .flat_map(|p| {
+                    if let Some(tile) = self.tile(p.position) {
+                        let vec_photons_t = tile.transform(p);
+                        vec_photons_t
+                    } else {
+                        Vec::new()
+                    }
+                })
+                .collect();
+        }
+    }
+
     pub fn score(&self) -> u64 {
         let mut score: u64 = 0;
         for row in self.grid.iter() {
@@ -137,6 +172,14 @@ impl Grid {
             }
         }
         score
+    }
+
+    pub fn clear(&mut self) {
+        for row in self.grid.iter_mut() {
+            for tile in row.iter_mut() {
+                tile.clear();
+            }
+        }
     }
 }
 
@@ -174,7 +217,7 @@ impl Photon {
     }
 }
 
-#[aocd(2023, 16)]
+#[aocd(2023, 16, "src/day16/test.txt")]
 pub fn solution1() {
     let input_data: Vec<Vec<Tile>> = input!()
         .split('\n')
@@ -188,32 +231,11 @@ pub fn solution1() {
     // Initialize grid
     let mut grid = Grid { grid: input_data };
 
+    // Display grid
     grid.display();
 
-    // Create first photon
-    let initial_photon = Photon {
-        position: (0, 0),
-        direction: Direction::Right
-    };
-    
-    // List to store all photons
-    let mut photons = vec![initial_photon];
-
-    // Traverse the grid
-    while !photons.is_empty() {
-        // Transform directions based on tile position
-        photons = photons
-            .iter_mut()
-            .flat_map(|p| {
-                let tile = grid.tile(p.position).unwrap();
-                let vec_photons_t = tile.transform(p);
-                vec_photons_t
-            })
-            .collect();
-        
-        // Move each photon
-        photons.retain_mut(|p| p.travel(&mut grid));
-    }
+    // Shoot a photon
+    grid.beam_photon_at((0, -1), Direction::Right);
 
     // Submit score
     submit!(1, grid.score());
@@ -221,5 +243,59 @@ pub fn solution1() {
 
 #[aocd(2023, 16)]
 pub fn solution2() {
+    let input_data: Vec<Vec<Tile>> = input!()
+        .split('\n')
+        .map(|s| {
+            s.trim().chars()
+                .map(|c| Tile::new(c))
+                .collect::<Vec<Tile>>()
+        })
+        .collect();
 
+    // Initialize grid
+    let mut grid = Grid { grid: input_data };
+
+    // Display grid
+    grid.display();
+
+    // Get rows and columns
+    let nrows = grid.grid.len();
+    let ncols = grid.grid[0].len();
+
+    // Store energy scores for each grid configuration
+    let mut scores: Vec<u64> = Vec::new();
+
+    // From top
+    for i in 0..ncols {
+        grid.beam_photon_at((-1, i as i32), Direction::Down);
+        scores.push(grid.score());
+        grid.clear();
+    }
+
+    // From left
+    for i in 0..nrows {
+        grid.beam_photon_at((i as i32, -1), Direction::Right);
+        scores.push(grid.score());
+        grid.clear();
+    }
+
+    // From right
+    for i in 0..nrows {
+        grid.beam_photon_at((i as i32, ncols as i32), Direction::Left);
+        scores.push(grid.score());
+        grid.clear();
+    }
+
+    // From bottom
+    for i in 0..ncols {
+        grid.beam_photon_at((nrows as i32, i as i32), Direction::Up);
+        scores.push(grid.score());
+        grid.clear();
+    }
+
+    // Shoot a photon
+    let max_score = *scores.iter().max().unwrap();
+
+    // Submit score
+    submit!(2, max_score);
 }
