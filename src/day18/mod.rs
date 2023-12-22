@@ -1,11 +1,10 @@
 use aocd::*;
-use regex::Regex;
 
 #[derive(Debug)]
 pub struct Command<'a> {
     direction: char,
     length: usize,
-    color: &'a str
+    color: &'a str,
 }
 
 impl<'a> Command<'a> {
@@ -14,12 +13,12 @@ impl<'a> Command<'a> {
         Command {
             direction: data[0].chars().next().unwrap(),
             length: data[1].parse::<usize>().unwrap(),
-            color: data[2]
+            color: data[2],
         }
     }
 
     fn extract_direction_from_color(&self) -> char {
-        let color_vec = self.color.clone().chars().collect::<Vec<char>>();
+        let color_vec = self.color.chars().collect::<Vec<char>>();
         let nchars = color_vec.len();
         // Second to last character is the direction digit (parentheses is last char)
         match color_vec[nchars - 2] {
@@ -27,12 +26,12 @@ impl<'a> Command<'a> {
             '1' => 'D',
             '2' => 'L',
             '3' => 'U',
-            _ => unreachable!("Undefined color.")
+            _ => unreachable!("Undefined color."),
         }
     }
 
     fn extract_length_from_color(&self) -> usize {
-        let mut color_vec = self.color.clone().chars().collect::<Vec<char>>();
+        let mut color_vec = self.color.chars().collect::<Vec<char>>();
         // Remove leading parentheses
         color_vec.remove(0);
         // Remove hashtag
@@ -52,20 +51,20 @@ impl<'a> Command<'a> {
 pub enum TileType {
     Empty,
     Inner,
-    Edge
+    Edge,
 }
 
 pub struct Tile {
-    tile_type: TileType
+    tile_type: TileType,
 }
 
 pub struct Grid {
     grid: Vec<Vec<Tile>>,
-    start: (usize, usize)
+    start: (usize, usize),
 }
 
 impl Grid {
-    pub fn from_commands(commands: &Vec<Command>) -> Grid {
+    pub fn from_commands(commands: &[Command]) -> Grid {
         // Initial minimum and maximum positions
         let mut i_min: i32 = 0;
         let mut j_min: i32 = 0;
@@ -75,7 +74,7 @@ impl Grid {
         // Track up/down, left/right movement through the commands
         let mut i_pos: i32 = 0;
         let mut j_pos: i32 = 0;
-        
+
         // If our current vertical/horizontal position exceeds our current row/column
         // limits, expand them.
         for command in commands.iter() {
@@ -84,57 +83,53 @@ impl Grid {
                     j_pos += command.length as i32;
                     j_max = j_max.max(j_pos);
                     j_min = j_min.min(j_pos);
-                },
+                }
                 'L' => {
                     j_pos -= command.length as i32;
                     j_max = j_max.max(j_pos);
                     j_min = j_min.min(j_pos);
-                },
+                }
                 'U' => {
                     i_pos -= command.length as i32;
                     i_max = i_max.max(i_pos);
                     i_min = i_min.min(i_pos);
-                },
+                }
                 'D' => {
                     i_pos += command.length as i32;
                     i_max = i_max.max(i_pos);
                     i_min = i_min.min(i_pos);
-                },
-                _ => unreachable!("Undefined direction.")
+                }
+                _ => unreachable!("Undefined direction."),
             }
         }
 
         // Populate grid with empty tiles
         let i_size = i_max - i_min + 1;
         let j_size = j_max - j_min + 1;
-        let start = (i_min.abs() as usize, j_min.abs() as usize);
+        let start = (i_min.unsigned_abs() as usize, j_min.unsigned_abs() as usize);
         let mut grid = Vec::new();
         for _i in 0..i_size {
             let mut row = Vec::<Tile>::new();
             for _j in 0..j_size {
-                row.push(Tile { 
-                    tile_type: TileType::Empty
+                row.push(Tile {
+                    tile_type: TileType::Empty,
                 });
             }
             grid.push(row);
         }
 
-        Grid { 
-            grid,
-            start
-        }
+        Grid { grid, start }
     }
 
     pub fn display(&self) {
         println!("({}, {})", self.grid.len(), self.grid[0].len());
         for row in self.grid.iter() {
-            let row_string = row.iter()
-                .map(|t| {
-                    match t.tile_type {
-                        TileType::Edge => '#',
-                        TileType::Empty => '.',
-                        TileType::Inner => 'o'
-                    }
+            let row_string = row
+                .iter()
+                .map(|t| match t.tile_type {
+                    TileType::Edge => '#',
+                    TileType::Empty => '.',
+                    TileType::Inner => 'o',
                 })
                 .collect::<String>();
             println!("{}", row_string);
@@ -149,7 +144,7 @@ impl Grid {
         self.grid[0].len()
     }
 
-    pub fn traversal(&mut self, commands: &Vec<Command>) {
+    pub fn traversal(&mut self, commands: &[Command]) {
         let mut i_pos: i32 = self.start.0 as i32;
         let mut j_pos: i32 = self.start.1 as i32;
         let mut tiles = vec![(i_pos as usize, j_pos as usize)];
@@ -158,11 +153,11 @@ impl Grid {
         // Traverse the grid using the commands
         for command in commands.iter() {
             let (i_incr, j_incr, i_offset, j_offset) = match command.direction {
-                'R' => (0 as i32, 1 as i32, 1 as i32, 0 as i32),
+                'R' => (0_i32, 1_i32, 1_i32, 0_i32),
                 'L' => (0, -1, -1, 0),
                 'U' => (-1, 0, 0, 1),
                 'D' => (1, 0, 0, -1),
-                _ => unreachable!("Undefined direction.")
+                _ => unreachable!("Undefined direction."),
             };
             for _ in 0..command.length {
                 // Add starboard tile next to current tile
@@ -174,7 +169,7 @@ impl Grid {
                 i_pos += i_incr;
                 j_pos += j_incr;
                 tiles.push((i_pos as usize, j_pos as usize));
-                
+
                 // Add starboard tile of that one
                 let i_starboard = i_pos + i_offset;
                 let j_starboard = j_pos + j_offset;
@@ -223,12 +218,9 @@ impl Grid {
             .map(|row| {
                 let row_score: u64 = row
                     .iter()
-                    .map(|t| {
-                        let score = match t.tile_type {
-                            TileType::Edge | TileType::Inner => 1,
-                            TileType::Empty => 0
-                        };
-                        score
+                    .map(|t| match t.tile_type {
+                        TileType::Edge | TileType::Inner => 1,
+                        TileType::Empty => 0,
                     })
                     .sum();
                 row_score

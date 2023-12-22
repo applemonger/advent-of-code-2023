@@ -1,13 +1,11 @@
 use aocd::*;
-use std::collections::HashSet;
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
+use std::hash::Hash;
 
 #[derive(Debug, Hash)]
 pub struct Tile {
     tile_type: char,
     energized: bool,
-    history: Vec<Photon>
+    history: Vec<Photon>,
 }
 
 impl Tile {
@@ -15,7 +13,7 @@ impl Tile {
         Tile {
             tile_type,
             energized: false,
-            history: Vec::new()
+            history: Vec::new(),
         }
     }
 
@@ -27,71 +25,67 @@ impl Tile {
         // A photon has visited the tile, so the tile is now energized
         self.energize();
 
-        // If a photon with this particular direction has already visited this tile 
+        // If a photon with this particular direction has already visited this tile
         // before, do not propagate it
         if self.history.contains(photon) {
-            return Vec::<Photon>::new()
+            return Vec::<Photon>::new();
         } else {
-            self.history.push(photon.clone());
+            self.history.push(*photon);
         }
 
         // Alter the photon's trajectory
         match self.tile_type {
             '.' => {
-                let photon_t = photon.clone();
+                let photon_t = *photon;
                 vec![photon_t]
-            },
+            }
             '/' => {
-                let mut photon_t = photon.clone();
+                let mut photon_t = *photon;
                 photon_t.direction = match photon.direction {
                     Direction::Up => Direction::Right,
                     Direction::Down => Direction::Left,
                     Direction::Right => Direction::Up,
-                    Direction::Left => Direction::Down
+                    Direction::Left => Direction::Down,
                 };
                 vec![photon_t]
-            },
+            }
             '\\' => {
-                let mut photon_t = photon.clone();
+                let mut photon_t = *photon;
                 photon_t.direction = match photon.direction {
                     Direction::Up => Direction::Left,
                     Direction::Down => Direction::Right,
                     Direction::Right => Direction::Down,
-                    Direction::Left => Direction::Up
+                    Direction::Left => Direction::Up,
                 };
                 vec![photon_t]
-            },
-            '|' => {
-                match photon.direction {
-                    Direction::Up | Direction::Down => {
-                        let photon_t = photon.clone();
-                        vec![photon_t]
-                    },
-                    Direction::Left | Direction::Right => {
-                        let mut photon_t1 = photon.clone();
-                        let mut photon_t2 = photon.clone();
-                        photon_t1.direction = Direction::Up;
-                        photon_t2.direction = Direction::Down;
-                        vec![photon_t1, photon_t2]
-                    }
+            }
+            '|' => match photon.direction {
+                Direction::Up | Direction::Down => {
+                    let photon_t = *photon;
+                    vec![photon_t]
+                }
+                Direction::Left | Direction::Right => {
+                    let mut photon_t1 = *photon;
+                    let mut photon_t2 = *photon;
+                    photon_t1.direction = Direction::Up;
+                    photon_t2.direction = Direction::Down;
+                    vec![photon_t1, photon_t2]
                 }
             },
-            '-' => {
-                match photon.direction {
-                    Direction::Left | Direction::Right => {
-                        let photon_t = photon.clone();
-                        vec![photon_t]
-                    },
-                    Direction::Up | Direction::Down => {
-                        let mut photon_t1 = photon.clone();
-                        let mut photon_t2 = photon.clone();
-                        photon_t1.direction = Direction::Left;
-                        photon_t2.direction = Direction::Right;
-                        vec![photon_t1, photon_t2]
-                    }
+            '-' => match photon.direction {
+                Direction::Left | Direction::Right => {
+                    let photon_t = *photon;
+                    vec![photon_t]
+                }
+                Direction::Up | Direction::Down => {
+                    let mut photon_t1 = *photon;
+                    let mut photon_t2 = *photon;
+                    photon_t1.direction = Direction::Left;
+                    photon_t2.direction = Direction::Right;
+                    vec![photon_t1, photon_t2]
                 }
             },
-            _ => unreachable!("Non-existent tile type.")
+            _ => unreachable!("Non-existent tile type."),
         }
     }
 
@@ -103,19 +97,16 @@ impl Tile {
 
 #[derive(Hash)]
 pub struct Grid {
-    grid: Vec<Vec<Tile>>
+    grid: Vec<Vec<Tile>>,
 }
 
 impl Grid {
     pub fn display(&self) {
         for row in self.grid.iter() {
-            let s: String = row.iter().map(|t| {
-                if t.energized {
-                    '#'
-                } else {
-                    t.tile_type
-                }
-            }).collect();
+            let s: String = row
+                .iter()
+                .map(|t| if t.energized { '#' } else { t.tile_type })
+                .collect();
             println!("{}", s);
         }
     }
@@ -129,16 +120,19 @@ impl Grid {
     }
 
     pub fn out_of_bounds(&self, position: (i32, i32)) -> bool {
-        (position.0 < 0) || (position.0 >= self.grid.len() as i32) || (position.1 < 0) || (position.1 >= self.grid[0].len() as i32)
+        (position.0 < 0)
+            || (position.0 >= self.grid.len() as i32)
+            || (position.1 < 0)
+            || (position.1 >= self.grid[0].len() as i32)
     }
 
     pub fn beam_photon_at(&mut self, position: (i32, i32), direction: Direction) {
         // Create first photon
         let initial_photon = Photon {
             position,
-            direction
+            direction,
         };
-        
+
         // List to store all photons
         let mut photons = vec![initial_photon];
 
@@ -152,8 +146,7 @@ impl Grid {
                 .iter_mut()
                 .flat_map(|p| {
                     if let Some(tile) = self.tile(p.position) {
-                        let vec_photons_t = tile.transform(p);
-                        vec_photons_t
+                        tile.transform(p)
                     } else {
                         Vec::new()
                     }
@@ -188,13 +181,13 @@ pub enum Direction {
     Up,
     Down,
     Left,
-    Right
+    Right,
 }
 
 #[derive(Hash, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Photon {
     position: (i32, i32),
-    direction: Direction
+    direction: Direction,
 }
 
 impl Photon {
@@ -203,7 +196,7 @@ impl Photon {
             Direction::Up => (self.position.0 - 1, self.position.1),
             Direction::Down => (self.position.0 + 1, self.position.1),
             Direction::Left => (self.position.0, self.position.1 - 1),
-            Direction::Right => (self.position.0, self.position.1 + 1)
+            Direction::Right => (self.position.0, self.position.1 + 1),
         }
     }
 
@@ -221,11 +214,7 @@ impl Photon {
 pub fn solution1() {
     let input_data: Vec<Vec<Tile>> = input!()
         .split('\n')
-        .map(|s| {
-            s.trim().chars()
-                .map(|c| Tile::new(c))
-                .collect::<Vec<Tile>>()
-        })
+        .map(|s| s.trim().chars().map(Tile::new).collect::<Vec<Tile>>())
         .collect();
 
     // Initialize grid
@@ -245,11 +234,7 @@ pub fn solution1() {
 pub fn solution2() {
     let input_data: Vec<Vec<Tile>> = input!()
         .split('\n')
-        .map(|s| {
-            s.trim().chars()
-                .map(|c| Tile::new(c))
-                .collect::<Vec<Tile>>()
-        })
+        .map(|s| s.trim().chars().map(Tile::new).collect::<Vec<Tile>>())
         .collect();
 
     // Initialize grid
