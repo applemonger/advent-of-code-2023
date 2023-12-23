@@ -203,7 +203,7 @@ impl<'a> ModuleData<'a> {
     }
 }
 
-#[aocd(2023, 19, "src/day20/input.txt")]
+#[aocd(2023, 20, "src/day20/input.txt")]
 pub fn solution1() {
     let input_data = input!();
 
@@ -274,5 +274,73 @@ pub fn solution1() {
     submit!(1, low_count * high_count);
 }
 
-#[aocd(2023, 19)]
-pub fn solution2() {}
+#[aocd(2023, 20)]
+pub fn solution2() {
+    let input_data = input!();
+
+    // Get names of all referenced modules in senders or receivers
+    let module_names: Vec<&str> = input_data
+        .split('\n')
+        .flat_map(get_all_module_names_from_str)
+        .collect();
+    
+    // Data structure to store all pertinent module data for each referenced module
+    let mut module_data: HashMap<&str, ModuleData> = module_names
+        .iter()
+        .map(|s| {
+            (*s, ModuleData::new(s))
+        })
+        .collect();
+
+    // Loop back through the input data and fill the data structure
+    for data in input_data.split('\n') {
+        let sender = get_sender_from_str(data);
+        let receivers = get_receivers_from_str(data);
+        let module_type = get_module_type_from_str(data);
+        let module = module_data.get_mut(&sender).unwrap();
+        module.receivers = receivers;
+        module.module = module_type;
+    }        
+    
+    // Loop back through the input data and fill in input modules
+    for data in input_data.split('\n') {
+        let sender = get_sender_from_str(data);
+        let receivers = get_receivers_from_str(data);
+        // For each receiver listed, find that module and add in the sender as an input
+        for receiver in receivers.iter() {
+            let module = module_data.get_mut(receiver).unwrap();
+            module.inputs.push(sender);
+        }
+    }
+
+    // Create modules from the module data
+    let mut modules: HashMap<&str, Box<dyn Module>> = module_data.into_iter()
+        .map(|(module_name, module_data)| {
+            (module_name, module_data.to_module())
+        })
+        .collect();
+
+    let mut button_presses = 0;
+    let mut rx_low_pulse_count = 0;
+    while rx_low_pulse_count != 1 {
+        let button_pulse = Pulse {
+            sender: "button",
+            receiver: "broadcaster",
+            low: true
+        };
+        button_presses += 1;
+        rx_low_pulse_count = 0;
+        let mut pulse_queue = vec![button_pulse];
+        while !pulse_queue.is_empty() {
+            let current_pulse = pulse_queue.remove(0);
+            if current_pulse.receiver == "rx" && current_pulse.low {
+                rx_low_pulse_count += 1;
+            }
+            let module = modules.get_mut(current_pulse.receiver).unwrap();
+            let mut pulses = module.receive(current_pulse);
+            pulse_queue.append(&mut pulses);
+        }
+    }
+
+    submit!(2, button_presses);
+}
