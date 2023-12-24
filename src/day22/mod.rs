@@ -83,7 +83,10 @@ impl Brick {
     }
 }
 
-fn drop_bricks(mut bricks: Vec<Brick>) -> Vec<Brick> {
+fn drop_bricks(mut bricks: Vec<Brick>) -> (u32, Vec<Brick>) {
+    // Number of bricks fallen
+    let mut bricks_fallen = 0;
+
     // Sort by highest to lowest
     bricks.sort_by_key(|b| b.min_z());
 
@@ -92,10 +95,15 @@ fn drop_bricks(mut bricks: Vec<Brick>) -> Vec<Brick> {
     let min_z = brick.min_z();
     let drop_distance = min_z - 1;
     brick.drop(drop_distance);
+    if drop_distance > 0 {
+        bricks_fallen += 1;
+    }
 
     // Drop the rest
     let mut index = 1;
     'iterbricks: loop {
+        let mut brick_fell = false;
+
         // Past last brick, stop loop
         if index == bricks.len() {
             break 'iterbricks;
@@ -119,7 +127,11 @@ fn drop_bricks(mut bricks: Vec<Brick>) -> Vec<Brick> {
 
         // If there is a max, drop the current brick to one above that one
         if let Some(z_max) = z_max_option {
-            bricks[index].drop(z_min - z_max - 1);
+            let drop_distance = z_min - z_max - 1;
+            bricks[index].drop(drop_distance);
+            if drop_distance > 0 {
+                brick_fell = true;
+            }
         }
 
         // Keep dropping it until it is blocked by another brick or the floor
@@ -154,12 +166,20 @@ fn drop_bricks(mut bricks: Vec<Brick>) -> Vec<Brick> {
 
         // Apply the fall to the actual brick
         bricks[index].drop(drop_distance);
+        if drop_distance > 0 {
+            brick_fell = true;
+        }
+
+        // Count fallen brick
+        if brick_fell {
+            bricks_fallen += 1;
+        }
 
         // Go the next brick
         index += 1;
     }
 
-    bricks
+    (bricks_fallen, bricks)
 }
 
 fn is_packed(bricks: Vec<Brick>) -> bool {
@@ -200,7 +220,7 @@ pub fn solution1() {
         .collect();
 
     // Initial brick drop
-    let settled_bricks = drop_bricks(bricks);
+    let (_, settled_bricks) = drop_bricks(bricks);
     let n_bricks = settled_bricks.len();
 
     // For each brick, check if it can be removed
@@ -220,6 +240,28 @@ pub fn solution1() {
 #[aocd(2023, 22)]
 pub fn solution2() {
     let input_data = input!();
+
+    // Read bricks
+    let bricks: Vec<Brick> = input_data
+        .lines()
+        .map(|line| Brick::from_str(line))
+        .collect();
+
+    // Initial brick drop
+    let (_, settled_bricks) = drop_bricks(bricks);
+    let n_bricks = settled_bricks.len();
+
+    // For each brick, check if it can be removed
+    let mut bricks_fallen = 0;
+    for i in 0..n_bricks {
+        println!("Simulation {i}/{n_bricks}");
+        let mut simulation_bricks = settled_bricks.clone();
+        simulation_bricks.remove(i);
+        let (bricks_fallen_incr, _) = drop_bricks(simulation_bricks);
+        bricks_fallen += bricks_fallen_incr;
+    }
+
+    submit!(2, bricks_fallen);
 }
 
 #[cfg(test)]
