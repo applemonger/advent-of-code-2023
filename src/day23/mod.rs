@@ -94,6 +94,7 @@ struct CoordHeap {
 }
 
 impl CoordHeap {
+    // Sort vector by least to most f-score
     fn add_coord(&mut self, node: Coord, f_scores: &HashMap<Coord, i32>) {
         self.coords.push(node);
         self.coords.sort_by(|a, b| {
@@ -107,7 +108,7 @@ impl CoordHeap {
         self.coords.is_empty()
     }
 
-    /// Returns the node with the minimum f-score
+    /// Returns the node with the maximum f-score
     fn pop(&mut self) -> Coord {
         self.coords.pop().unwrap()
     }
@@ -196,6 +197,7 @@ impl Grid {
     }
     
     fn a_star(&mut self) {
+        // F-scores: HashMap of nodes to f-scores, default of a large number
         let mut f_scores = HashMap::<Coord, i32>::new();
         for row in self.data.iter() {
             for tile in row.iter() {
@@ -204,11 +206,16 @@ impl Grid {
         }
         f_scores.insert(self.start, self.start.manhattan(&self.end));
 
+        // Open set: set of discovered nodes to expand on
+        // Starts with the starting node
         let mut open_set = CoordHeap::default();
         open_set.add_coord(self.start, &f_scores);
 
+        // Came from: HashMap of nodes and parent nodes
         let mut came_from = HashMap::<Coord, Coord>::new();
 
+        // G-scores: cost of cheapest path from start to a given node currently known
+        // Default is a large number
         let mut g_scores = HashMap::<Coord, i32>::new();
         for row in self.data.iter() {
             for tile in row.iter() {
@@ -234,6 +241,7 @@ impl Grid {
                 }
             }
 
+            // Expand on neighbors
             'traversal: for neighbor in current.neighbors() {
                 // Skip neighbors that are out of bounds
                 if self.out_of_bounds(&neighbor) {
